@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sentinel AI | Threat Intelligence</title>
+  <title>iQOO Sentinel | Threat Intelligence</title>
   
   <link rel="manifest" href="/static/manifest.json" />
-  <meta name="theme-color" content="#020617" />
+  <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   
   <!-- Modern Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #020617;
-      --panel: rgba(15, 23, 42, 0.7);
-      --border: rgba(56, 189, 248, 0.2);
-      --text: #f8fafc;
-      --accent: #38bdf8;
-      --glow: 0 0 20px rgba(56, 189, 248, 0.4);
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --safe: #10b981;
+      --bg: #050505; /* Deep Black */
+      --panel: #121212;
+      --border: rgba(255, 200, 0, 0.2);
+      --text: #ffffff;
+      --iqoo-yellow: #FFC800; /* iQOO Signature Yellow */
+      --glow: 0 0 20px rgba(255, 200, 0, 0.3);
+      --danger: #ff3333;
+      --warning: #ffaa00;
+      --safe: #00cc66;
     }
 
     * { box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       margin: 0;
-      padding: 1rem;
+      padding: 1.2rem;
       min-height: 100vh;
       line-height: 1.6;
     }
@@ -44,60 +44,31 @@
     }
     .header h1 {
       margin: 0;
-      font-size: 2rem;
-      font-weight: 800;
+      font-size: 2.2rem;
+      font-weight: 900;
+      font-style: italic;
       letter-spacing: 1px;
-      color: var(--accent);
-      text-shadow: var(--glow);
+      color: var(--iqoo-yellow);
+      text-transform: uppercase;
     }
     .header p {
       margin: 0;
-      font-size: 0.9rem;
-      color: #94a3b8;
+      font-size: 0.85rem;
+      color: #888;
       text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 0.5rem;
-      background: rgba(0,0,0,0.3);
-      padding: 0.5rem;
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--border);
-    }
-    .tab {
-      flex: 1;
-      padding: 0.75rem;
-      text-align: center;
-      background: transparent;
-      color: #94a3b8;
-      border: none;
-      border-radius: 8px;
+      letter-spacing: 3px;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .tab.active {
-      background: var(--accent);
-      color: #0f172a;
-      box-shadow: var(--glow);
     }
 
     /* Glass Panels */
     .panel {
       background: var(--panel);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 1.5rem;
-      display: none;
       animation: fadeIn 0.4s ease-out forwards;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
-    .panel.active { display: block; }
     
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -107,43 +78,43 @@
     /* Form Elements */
     label {
       display: block;
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.8rem;
+      color: #aaa;
       margin-bottom: 0.5rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      font-weight: 600;
     }
     select, textarea {
       width: 100%;
-      background: rgba(0,0,0,0.4);
+      background: #000;
       color: white;
-      border: 1px solid var(--border);
+      border: 1px solid #333;
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 1.5rem;
       font-family: inherit;
       font-size: 1rem;
-      transition: border 0.3s ease;
+      transition: all 0.3s ease;
     }
-    textarea#codeInput { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
     textarea:focus, select:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: inset 0 0 10px rgba(56,189,248,0.2);
+      border-color: var(--iqoo-yellow);
+      box-shadow: inset 0 0 10px rgba(255,200,0,0.1);
     }
 
     button.scan-btn {
       width: 100%;
-      background: linear-gradient(135deg, #0ea5e9, #2563eb);
-      color: white;
+      background: var(--iqoo-yellow);
+      color: #000;
       border: none;
-      padding: 1rem;
+      padding: 1.1rem;
       border-radius: 8px;
       font-size: 1.1rem;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     button.scan-btn:active { transform: scale(0.98); }
@@ -153,12 +124,12 @@
     #loader {
       display: none;
       text-align: center;
-      padding: 3rem 0;
+      padding: 2.5rem 0;
     }
     .radar {
       width: 60px; height: 60px;
       border-radius: 50%;
-      border: 2px solid var(--accent);
+      border: 2px solid var(--iqoo-yellow);
       margin: 0 auto 1rem auto;
       position: relative;
       overflow: hidden;
@@ -169,55 +140,58 @@
       position: absolute;
       top: 50%; left: 50%;
       width: 50%; height: 50%;
-      background: linear-gradient(45deg, transparent 50%, rgba(56,189,248,0.8) 100%);
+      background: linear-gradient(45deg, transparent 50%, rgba(255,200,0,0.9) 100%);
       transform-origin: 0 0;
-      animation: scan 1.5s linear infinite;
+      animation: scan 1.2s linear infinite;
     }
     @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     /* Threat Report (Results) */
     #resultPanel {
       margin-top: 1.5rem;
-      border-left: 4px solid var(--accent);
+      display: none;
+      border-left: 4px solid var(--iqoo-yellow);
     }
     .badge {
       display: inline-block;
       padding: 0.4rem 1rem;
-      border-radius: 6px;
-      font-weight: 800;
+      border-radius: 4px;
+      font-weight: 900;
       font-size: 0.9rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       margin-bottom: 1rem;
       color: #fff;
     }
-    .badge-Low { background: var(--safe); box-shadow: 0 0 15px var(--safe); }
-    .badge-Medium { background: var(--warning); box-shadow: 0 0 15px var(--warning); }
-    .badge-High { background: var(--danger); box-shadow: 0 0 15px var(--danger); }
+    .badge-Low { background: var(--safe); box-shadow: 0 0 15px rgba(0,204,102,0.4); }
+    .badge-Medium { background: var(--warning); color: #000; box-shadow: 0 0 15px rgba(255,170,0,0.4); }
+    .badge-High { background: var(--danger); box-shadow: 0 0 15px rgba(255,51,51,0.4); }
 
     .report-section { margin-bottom: 1.5rem; }
     .report-section h3 {
-      font-size: 0.9rem;
-      color: #94a3b8;
+      font-size: 0.85rem;
+      color: var(--iqoo-yellow);
       text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.3rem;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.4rem;
       margin-bottom: 0.5rem;
     }
     .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
     .tag {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      padding: 0.2rem 0.6rem;
+      background: rgba(255, 51, 51, 0.15);
+      color: #ff6666;
+      border: 1px solid rgba(255, 51, 51, 0.3);
+      padding: 0.3rem 0.6rem;
       border-radius: 4px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
     }
     .screenshot {
       width: 100%;
       border-radius: 8px;
-      border: 1px solid var(--border);
+      border: 1px solid #333;
       margin-top: 0.5rem;
     }
   </style>
@@ -225,58 +199,37 @@
 <body>
 
   <div class="header">
-    <h1>SENTINEL</h1>
-    <p>AI Threat Intelligence</p>
+    <h1>iQOO Sentinel</h1>
+    <p>Mobile Threat Defense</p>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('messageTab', this)">Phishing & URLs</button>
-    <button class="tab" onclick="switchTab('codeTab', this)">Source Code</button>
-  </div>
-
-  <!-- MSG / URL SCANNER -->
-  <div id="messageTab" class="panel active">
-    <label>Communication Channel</label>
+  <!-- MAIN SCANNER -->
+  <div class="panel">
+    <label>Message Source</label>
     <select id="channel">
-      <option value="sms">SMS / iMessage</option>
-      <option value="whatsapp">WhatsApp / Telegram</option>
+      <option value="sms">SMS / Messages</option>
+      <option value="whatsapp">WhatsApp</option>
       <option value="email">Email</option>
       <option value="social">Social Media</option>
     </select>
     
-    <label>Payload (Text, URL, or UPI)</label>
-    <textarea id="msgInput" rows="4" placeholder="Paste the suspicious link or message here..."></textarea>
+    <label>Suspicious Payload</label>
+    <textarea id="msgInput" rows="5" placeholder="Paste the suspicious link, UPI ID, or message text here..."></textarea>
     
-    <button class="scan-btn" onclick="triggerScan('message')">Initiate Scan</button>
-  </div>
-
-  <!-- CODE SCANNER -->
-  <div id="codeTab" class="panel">
-    <label>Source Code Snippet</label>
-    <textarea id="codeInput" rows="6" placeholder="Paste backend script, JS, or config file..."></textarea>
-    
-    <button class="scan-btn" onclick="triggerScan('code')">Analyze Logic</button>
+    <button class="scan-btn" onclick="triggerScan()">Run Diagnostics</button>
   </div>
 
   <!-- SCANNING ANIMATION -->
   <div id="loader">
     <div class="radar"></div>
-    <p style="color: var(--accent); font-weight: 600; letter-spacing: 1px;">ISOLATING SANDBOX & ANALYZING...</p>
+    <p style="color: var(--iqoo-yellow); font-weight: 900; letter-spacing: 2px; font-size: 0.9rem;">ANALYZING THREATS...</p>
   </div>
 
   <!-- RESULTS PANEL -->
   <div id="resultPanel" class="panel"></div>
 
   <script>
-    function switchTab(tabId, element) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      element.classList.add('active');
-      document.getElementById('resultPanel').style.display = 'none';
-    }
-
-    async function triggerScan(type) {
+    async function triggerScan() {
       const loader = document.getElementById('loader');
       const resultPanel = document.getElementById('resultPanel');
       const inputs = document.querySelectorAll('button, textarea, select');
@@ -285,63 +238,69 @@
       resultPanel.style.display = 'none';
       loader.style.display = 'block';
 
-      const endpoint = type === 'message' ? '/scan/message' : '/scan/code';
-      const payload = type === 'message'
-        ? { text: document.getElementById('msgInput').value, channel: document.getElementById('channel').value }
-        : { code: document.getElementById('codeInput').value };
+      const payload = { 
+        text: document.getElementById('msgInput').value, 
+        channel: document.getElementById('channel').value 
+      };
 
       try {
-        const scanRes = await fetch(endpoint, {
+        // 1. Sandbox Scan
+        const scanRes = await fetch('/scan/message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const evidence = await scanRes.json();
 
+        // 2. AI Analysis
         const aiRes = await fetch('/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ evidence, type })
+          body: JSON.stringify({ evidence, type: 'message' })
         });
         const analysis = await aiRes.json();
 
+        // 3. Render Results
         const risk = analysis.risk_level || 'High';
         let html = `<div class="badge badge-${risk}">${risk} RISK DETECTED</div>`;
 
-        // Render extracted flags/findings as hacker-style tags
-        const allFlags = [...(evidence.flags || []), ...(evidence.findings || [])];
-        if (allFlags.length > 0) {
+        // Render extracted flags
+        if (evidence.flags && evidence.flags.length > 0) {
           html += `<div class="report-section">
-            <h3>Heuristics Triggered</h3>
-            <div class="tags">${allFlags.map(f => `<span class="tag">${f}</span>`).join('')}</div>
+            <h3>Red Flags Detected</h3>
+            <div class="tags">${evidence.flags.map(f => `<span class="tag">${f.replace('_', ' ')}</span>`).join('')}</div>
           </div>`;
         }
 
         html += `<div class="report-section">
-          <h3>AI Analysis</h3>
-          <p>${analysis.explanation}</p>
+          <h3>Security Analysis</h3>
+          <p style="font-size: 0.95rem; color: #eee;">${analysis.explanation}</p>
         </div>`;
 
         html += `<div class="report-section">
-          <h3>Remediation Action</h3>
-          <p style="color: var(--accent); font-weight:600;">${analysis.fix}</p>
+          <h3>Recommended Action</h3>
+          <p style="color: var(--iqoo-yellow); font-weight: 600; font-size: 0.95rem;">${analysis.fix}</p>
         </div>`;
 
-        if (type === 'message' && evidence.url_analysis && evidence.url_analysis[0]?.screenshot_base64) {
+        // Render Sandbox image if available
+        if (evidence.url_analysis && evidence.url_analysis[0]?.screenshot_base64) {
           html += `<div class="report-section">
-            <h3>Sandboxed Preview</h3>
+            <h3>Sandboxed Link Preview</h3>
+            <p style="font-size: 0.8rem; color: #888; margin-top:-5px;">Safely captured in an isolated cloud browser.</p>
             <img class="screenshot" src="data:image/png;base64,${evidence.url_analysis[0].screenshot_base64}" />
           </div>`;
+        } else if (evidence.url_analysis && evidence.url_analysis[0]?.error) {
+            html += `<p style="color: var(--danger); font-size: 0.85rem;">Sandbox Error: Dead link or connection timed out.</p>`;
         }
 
         resultPanel.innerHTML = html;
         resultPanel.style.display = 'block';
         
-        // Scroll to results smoothly
-        resultPanel.scrollIntoView({ behavior: 'smooth' });
+        // Scroll to results
+        resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       } catch (err) {
-        resultPanel.innerHTML = `<p style="color: var(--danger);"><strong>System Error:</strong> ${err.message}</p>`;
+        resultPanel.innerHTML = `<p style="color: var(--danger);"><strong>System Error:</strong> Cannot reach AI analysis engine. Ensure backend is running.</p>`;
         resultPanel.style.display = 'block';
       } finally {
         inputs.forEach(i => i.disabled = false);
