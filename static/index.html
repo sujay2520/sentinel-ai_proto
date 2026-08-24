@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sentinel AI</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/static/manifest.json" />
+  <meta name="theme-color" content="#0B1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/static/icon-512.png" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #0B1220;
+      color: #F5F7FA;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      line-height: 1.5;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      color: #F5A623;
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+    }
+    .card {
+      background: #111827;
+      border: 1px solid #1F2937;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #F5F7FA;
+    }
+    select, textarea {
+      width: 100%;
+      background-color: #1F2937;
+      color: #F5F7FA;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    textarea:focus, select:focus {
+      outline: 1px solid #F5A623;
+      border-color: #F5A623;
+    }
+    button {
+      width: 100%;
+      background-color: #F5A623;
+      color: #0B1220;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:active {
+      opacity: 0.85;
+    }
+    button:disabled {
+      background-color: #4B5563;
+      cursor: not-allowed;
+    }
+    #loading {
+      display: none;
+      text-align: center;
+      color: #F5A623;
+      font-weight: 600;
+      margin: 1.5rem 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.8rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      color: #0B1220;
+    }
+    .badge-Low { background-color: #10B981; }
+    .badge-Medium { background-color: #F59E0B; }
+    .badge-High { background-color: #EF4444; }
+    .screenshot-box {
+      margin-top: 1rem;
+    }
+    .screenshot-box img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #374151;
+    }
+    .tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 0.5rem 0;
+    }
+    .tag {
+      background: #374151;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🛡️ Sentinel AI</h1>
+  </div>
+
+  <div class="card">
+    <h2>1. Scan Suspicious Message / URL</h2>
+    <select id="channel">
+      <option value="sms">SMS</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="email">Email</option>
+      <option value="other">Other / Social</option>
+    </select>
+    <textarea id="msgInput" rows="3" placeholder="Paste phishing text, link, or UPI id..."></textarea>
+    <button id="btnMsg" onclick="triggerScan('message')">Scan Message</button>
+  </div>
+
+  <div class="card">
+    <h2>2. Scan Code / Script</h2>
+    <textarea id="codeInput" rows="3" placeholder="Paste script or backend code..."></textarea>
+    <button id="btnCode" onclick="triggerScan('code')">Scan Code</button>
+  </div>
+
+  <div id="loading">⚡ Running sandbox & AI analysis...</div>
+  <div id="resultCard" class="card" style="display: none;"></div>
+
+  <script>
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .catch((err) => console.log('SW registration skipped:', err));
+      });
+    }
+
+    async function triggerScan(type) {
+      const btn = type === 'message' ? document.getElementById('btnMsg') : document.getElementById('btnCode');
+      const loader = document.getElementById('loading');
+      const resultCard = document.getElementById('resultCard');
+
+      btn.disabled = true;
+      loader.style.display = 'block';
+      resultCard.style.display = 'none';
+
+      const endpoint = type === 'message' ? '/scan/message' : '/scan/code';
+      const payload = type === 'message'
+        ? { text: document.getElementById('msgInput').value, channel: document.getElementById('channel').value }
+        : { code: document.getElementById('codeInput').value };
+
+      try {
+        // Step 1: Scan / Sandbox
+        const scanRes = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const evidence = await scanRes.json();
+
+        // Step 2: LLM Risk Analysis
+        const aiRes = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ evidence, type })
+        });
+        const analysis = await aiRes.json();
+
+        // Step 3: Render Results
+        const riskClass = 'badge-' + (analysis.risk_level || 'High');
+        let html = `<div class="badge ${riskClass}">${analysis.risk_level || 'Alert'} Risk</div>`;
+
+        // Render detected flags if any
+        if (evidence.flags && evidence.flags.length > 0) {
+          html += `<div class="tags">` + evidence.flags.map(f => `<span class="tag">${f}</span>`).join('') + `</div>`;
+        }
+        if (evidence.findings && evidence.findings.length > 0) {
+          html += `<div class="tags">` + evidence.findings.map(f => `<span class="tag">${f}</span>`).join('') + `</div>`;
+        }
+
+        html += `<p><strong>Analysis:</strong><br>${analysis.explanation}</p>`;
+        html += `<p><strong>Recommended Action:</strong><br>${analysis.fix}</p>`;
+
+        // Display sandbox screenshot if available
+        if (type === 'message' && evidence.url_analysis && evidence.url_analysis.length > 0) {
+          const urlInfo = evidence.url_analysis[0];
+          if (urlInfo.screenshot_base64) {
+            html += `<div class="screenshot-box">
+              <strong>Sandboxed Live Preview:</strong>
+              <img src="data:image/png;base64,${urlInfo.screenshot_base64}" alt="Sandbox capture" />
+            </div>`;
+          } else if (urlInfo.error) {
+            html += `<p style="color:#EF4444; font-size:0.85rem;">Sandbox Notice: ${urlInfo.error}</p>`;
+          }
+        }
+
+        resultCard.innerHTML = html;
+        resultCard.style.display = 'block';
+      } catch (err) {
+        resultCard.innerHTML = `<p style="color:#EF4444;">Error connecting to scanner: ${err.message}</p>`;
+        resultCard.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        loader.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
