@@ -3,22 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>iQOO Sentinel | Threat Intelligence</title>
+  <title>Sentinel | Threat Intelligence</title>
   
   <link rel="manifest" href="/static/manifest.json" />
   <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   
-  <!-- Modern Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap)" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #050505; /* Deep Black */
+      --bg: #050505; 
       --panel: #121212;
       --border: rgba(255, 200, 0, 0.2);
       --text: #ffffff;
-      --iqoo-yellow: #FFC800; /* iQOO Signature Yellow */
+      --brand-yellow: #FFC800; 
       --glow: 0 0 20px rgba(255, 200, 0, 0.3);
       --danger: #ff3333;
       --warning: #ffaa00;
@@ -36,7 +35,6 @@
       line-height: 1.6;
     }
 
-    /* Header */
     .header {
       text-align: center;
       margin-bottom: 2rem;
@@ -48,7 +46,7 @@
       font-weight: 900;
       font-style: italic;
       letter-spacing: 1px;
-      color: var(--iqoo-yellow);
+      color: var(--brand-yellow);
       text-transform: uppercase;
     }
     .header p {
@@ -60,7 +58,6 @@
       font-weight: 600;
     }
 
-    /* Glass Panels */
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -75,7 +72,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Form Elements */
     label {
       display: block;
       font-size: 0.8rem;
@@ -99,13 +95,13 @@
     }
     textarea:focus, select:focus {
       outline: none;
-      border-color: var(--iqoo-yellow);
+      border-color: var(--brand-yellow);
       box-shadow: inset 0 0 10px rgba(255,200,0,0.1);
     }
 
     button.scan-btn {
       width: 100%;
-      background: var(--iqoo-yellow);
+      background: var(--brand-yellow);
       color: #000;
       border: none;
       padding: 1.1rem;
@@ -120,7 +116,6 @@
     button.scan-btn:active { transform: scale(0.98); }
     button.scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Animated Loader */
     #loader {
       display: none;
       text-align: center;
@@ -129,7 +124,7 @@
     .radar {
       width: 60px; height: 60px;
       border-radius: 50%;
-      border: 2px solid var(--iqoo-yellow);
+      border: 2px solid var(--brand-yellow);
       margin: 0 auto 1rem auto;
       position: relative;
       overflow: hidden;
@@ -146,11 +141,10 @@
     }
     @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Threat Report (Results) */
     #resultPanel {
       margin-top: 1.5rem;
       display: none;
-      border-left: 4px solid var(--iqoo-yellow);
+      border-left: 4px solid var(--brand-yellow);
     }
     .badge {
       display: inline-block;
@@ -170,23 +164,12 @@
     .report-section { margin-bottom: 1.5rem; }
     .report-section h3 {
       font-size: 0.85rem;
-      color: var(--iqoo-yellow);
+      color: var(--brand-yellow);
       text-transform: uppercase;
       letter-spacing: 1px;
       border-bottom: 1px solid #333;
       padding-bottom: 0.4rem;
       margin-bottom: 0.5rem;
-    }
-    .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-    .tag {
-      background: rgba(255, 51, 51, 0.15);
-      color: #ff6666;
-      border: 1px solid rgba(255, 51, 51, 0.3);
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase;
     }
     .screenshot {
       width: 100%;
@@ -199,11 +182,10 @@
 <body>
 
   <div class="header">
-    <h1>iQOO Sentinel</h1>
+    <h1>Sentinel</h1>
     <p>Mobile Threat Defense</p>
   </div>
 
-  <!-- MAIN SCANNER -->
   <div class="panel">
     <label>Message Source</label>
     <select id="channel">
@@ -219,13 +201,11 @@
     <button class="scan-btn" onclick="triggerScan()">Run Diagnostics</button>
   </div>
 
-  <!-- SCANNING ANIMATION -->
   <div id="loader">
     <div class="radar"></div>
-    <p style="color: var(--iqoo-yellow); font-weight: 900; letter-spacing: 2px; font-size: 0.9rem;">ANALYZING THREATS...</p>
+    <p style="color: var(--brand-yellow); font-weight: 900; letter-spacing: 2px; font-size: 0.9rem;">ANALYZING THREATS...</p>
   </div>
 
-  <!-- RESULTS PANEL -->
   <div id="resultPanel" class="panel"></div>
 
   <script>
@@ -244,7 +224,6 @@
       };
 
       try {
-        // 1. Sandbox Scan
         const scanRes = await fetch('/scan/message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -252,7 +231,6 @@
         });
         const evidence = await scanRes.json();
 
-        // 2. AI Analysis
         const aiRes = await fetch('/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -260,17 +238,8 @@
         });
         const analysis = await aiRes.json();
 
-        // 3. Render Results
         const risk = analysis.risk_level || 'High';
         let html = `<div class="badge badge-${risk}">${risk} RISK DETECTED</div>`;
-
-        // Render extracted flags
-        if (evidence.flags && evidence.flags.length > 0) {
-          html += `<div class="report-section">
-            <h3>Red Flags Detected</h3>
-            <div class="tags">${evidence.flags.map(f => `<span class="tag">${f.replace('_', ' ')}</span>`).join('')}</div>
-          </div>`;
-        }
 
         html += `<div class="report-section">
           <h3>Security Analysis</h3>
@@ -279,24 +248,29 @@
 
         html += `<div class="report-section">
           <h3>Recommended Action</h3>
-          <p style="color: var(--iqoo-yellow); font-weight: 600; font-size: 0.95rem;">${analysis.fix}</p>
+          <p style="color: var(--brand-yellow); font-weight: 600; font-size: 0.95rem;">${analysis.fix}</p>
         </div>`;
 
-        // Render Sandbox image if available
-        if (evidence.url_analysis && evidence.url_analysis[0]?.screenshot_base64) {
-          html += `<div class="report-section">
-            <h3>Sandboxed Link Preview</h3>
-            <p style="font-size: 0.8rem; color: #888; margin-top:-5px;">Safely captured in an isolated cloud browser.</p>
-            <img class="screenshot" src="data:image/png;base64,${evidence.url_analysis[0].screenshot_base64}" />
-          </div>`;
-        } else if (evidence.url_analysis && evidence.url_analysis[0]?.error) {
-            html += `<p style="color: var(--danger); font-size: 0.85rem;">Sandbox Error: Dead link or connection timed out.</p>`;
+        if (evidence.url_analysis && evidence.url_analysis.length > 0) {
+          const urlData = evidence.url_analysis[0];
+          
+          if (urlData.screenshot_base64) {
+            html += `<div class="report-section">
+              <h3>Live Sandbox Preview</h3>
+              <p style="font-size: 0.8rem; color: #888; margin-top:-5px;">A safe, isolated capture of where the link leads.</p>
+              <img class="screenshot" src="data:image/png;base64,${urlData.screenshot_base64}" />
+            </div>`;
+          } else if (urlData.error) {
+            html += `<div class="report-section">
+              <h3>Live Sandbox Preview</h3>
+              <p style="color: #aaa; font-style: italic; font-size: 0.85rem;">No preview available. ${urlData.error}</p>
+            </div>`;
+          }
         }
 
         resultPanel.innerHTML = html;
         resultPanel.style.display = 'block';
         
-        // Scroll to results
         resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       } catch (err) {
