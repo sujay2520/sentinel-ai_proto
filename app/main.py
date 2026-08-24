@@ -21,13 +21,15 @@ browser_instance = None
 async def lifespan(app: FastAPI):
     global playwright_instance, browser_instance
     playwright_instance = await async_playwright().start()
+    # Stealth mode flags to bypass bot-blockers like pages.dev or Cloudflare
     browser_instance = await playwright_instance.chromium.launch(
         headless=True,
         args=[
             "--no-sandbox",
             "--disable-setuid-sandbox",
             "--disable-dev-shm-usage",
-            "--disable-gpu"
+            "--disable-blink-features=AutomationControlled",
+            "--window-size=1280,720"
         ]
     )
     yield
@@ -47,17 +49,26 @@ app.add_middleware(
 )
 
 async def scan_url_sandbox(url: str) -> dict:
+    # Auto-add https if the scammer hid it
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = "https://" + url
+
     try:
+        # Emulate a real mobile/desktop user to trick the scam site
         context = await browser_instance.new_context(
             accept_downloads=False,
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 720}
         )
         page = await context.new_page()
         
         redirects = []
         page.on("framenavigated", lambda frame: redirects.append(frame.url) if frame == page.main_frame else None)
         
-        await page.goto(url, timeout=10000, wait_until="domcontentloaded")
+        # wait_until="commit" ensures we grab a screenshot even if the site hangs trying to load malicious scripts
+        await page.goto(url, timeout=12000, wait_until="commit")
+        await page.wait_for_timeout(2000) # Give it 2 seconds to render visual elements
+        
         final_url = page.url
         title = await page.title()
         
@@ -79,7 +90,7 @@ async def scan_url_sandbox(url: str) -> dict:
     except Exception as e:
         return {
             "url": url,
-            "error": "The website blocked the security scanner or took too long to load."
+            "error": "Site timed out or attempted to block automated access. This is a common tactic for phishing pages."
         }
 
 class MessageRequest(BaseModel):
@@ -94,16 +105,19 @@ class AnalyzeRequest(BaseModel):
 async def scan_message(req: MessageRequest):
     text = req.text
     
-    # Smarter regex to extract URLs even if they are mashed against text
-    urls = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', text)
-    urls = [f"http://{u}" if u.startswith("www.") else u for u in urls]
+    # Smarter regex: Catches URLs without http:// (like api.whatsapp.com, pages.dev, t.me)
+    domain_pattern = r'(?:https?://|www\.)[^\s<>"]+|(?<!@)\b(?:[a-zA-Z0-9-]+\.)+(?:com|in|org|net|dev|xyz|io|app|co|me|vip|top|club|link|online|live|tech|site|cc|info|biz|icu|shop|store)(?:/[^\s<>"]*)?'
+    urls = re.findall(domain_pattern, text)
     
+    # Catch known Indian scam keywords
     flags = []
     text_lower = text.lower()
-    if any(w in text_lower for w in ["urgent", "verify now", "act now", "suspended"]):
+    if any(w in text_lower for w in ["salary", "part time", "work at home", "daily income", "earn money", "task", "passed", "rs "]):
+        flags.append("FINANCIAL_JOB_SCAM")
+    if any(w in text_lower for w in ["api.whatsapp.com", "wa.me", "t.me", "chat.whatsapp.com"]):
+        flags.append("UNVERIFIED_MESSENGER_REDIRECT")
+    if any(w in text_lower for w in ["urgent", "verify now", "act now", "suspended", "electricity", "pan update"]):
         flags.append("URGENCY_PRESSURE")
-    if any(w in text_lower for w in ["otp", "pin", "password", "cvv", "kyc"]):
-        flags.append("CREDENTIAL_HARVESTING")
     
     url_analysis = []
     for u in urls:
@@ -119,14 +133,11 @@ async def scan_message(req: MessageRequest):
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
-    raw_url = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
-    
-    # Auto-fix: Strip markdown brackets if accidentally pasted in Render
-    url_match = re.search(r'https?://[^\s)\]]+', raw_url)
-    base_url = url_match.group(0).rstrip("/") if url_match else "https://openrouter.ai/api/v1"
+    base_url = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1").replace("[", "").replace("]", "").replace("(", "").replace(")", "").split("http")[1]
+    base_url = "http" + base_url 
     
     api_key = os.getenv("LLM_API_KEY", "")
-    model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+    model = os.getenv("LLM_MODEL", "openrouter/free")
     
     clean_evidence = dict(req.evidence)
     if "url_analysis" in clean_evidence:
@@ -138,10 +149,11 @@ async def analyze(req: AnalyzeRequest):
 
     prompt = f"""
 Analyze this security evidence for a message/URL scan.
-Return a STRICT JSON object with exactly these 3 keys:
-- "risk_level": Must be exactly "Low", "Medium", or "High"
-- "explanation": Explain if it is safe or dangerous in VERY simple, everyday words. If it is a standard promotional voucher (like Lenskart/Google Pay), explicitly state that it is a safe promotional offer and explain why.
-- "fix": Direct action recommended (e.g., "Safe to open" or "Delete immediately").
+Return a STRICT JSON object with exactly these 4 keys:
+1. "risk_level": "Low", "Medium", or "High".
+2. "explanation": Explain the scam in very simple words (e.g., "This is a WhatsApp task scam pretending you got a salary"). If it's a normal promo (like Google Pay), say it's safe.
+3. "fix": Immediate recommended action (e.g., "Do not click").
+4. "incident_response": An array of 3-4 strings with emergency steps if the user already clicked or lost money. Include exactly these Indian cybercrime resources if High risk: "Call 1930 Cyber Helpline immediately", "File a complaint at cybercrime.gov.in", "Contact your bank/UPI app to freeze transactions", "Take screenshots of the chat as proof". If Low risk, return an empty array [].
 
 Evidence:
 {json.dumps(clean_evidence, indent=2)}
@@ -155,10 +167,10 @@ Evidence:
     payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": "You are a cyber security AI. Always output valid raw JSON without markdown code fences."},
+            {"role": "system", "content": "You are a cyber security AI. Always output valid raw JSON. No markdown formatting."},
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.2
+        "temperature": 0.1
     }
     
     try:
@@ -175,8 +187,13 @@ Evidence:
     except Exception as e:
         return {
             "risk_level": "High",
-            "explanation": f"Backend connection error to AI provider. Details: {str(e)}",
-            "fix": "Please verify your LLM_API_KEY and LLM_BASE_URL in the Render dashboard."
+            "explanation": f"The security analysis engine encountered an error parsing the threat. Error: {str(e)}",
+            "fix": "Do not interact with the message. Treat it as highly suspicious.",
+            "incident_response": [
+                "Call the National Cyber Crime Helpline at 1930 if you lost money.",
+                "Report the incident at cybercrime.gov.in",
+                "Freeze your bank accounts immediately."
+            ]
         }
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
