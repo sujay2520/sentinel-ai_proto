@@ -3,167 +3,287 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sentinel AI</title>
+  <title>Sentinel AI | Threat Intelligence</title>
   
-  <!-- PWA Meta Tags -->
   <link rel="manifest" href="/static/manifest.json" />
-  <meta name="theme-color" content="#0B1220" />
+  <meta name="theme-color" content="#020617" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="apple-touch-icon" href="/static/icon-512.png" />
+  
+  <!-- Modern Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg: #020617;
+      --panel: rgba(15, 23, 42, 0.7);
+      --border: rgba(56, 189, 248, 0.2);
+      --text: #f8fafc;
+      --accent: #38bdf8;
+      --glow: 0 0 20px rgba(56, 189, 248, 0.4);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --safe: #10b981;
+    }
+
     * { box-sizing: border-box; }
     body {
-      background-color: #0B1220;
-      color: #F5F7FA;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 1rem;
-      line-height: 1.5;
+      min-height: 100vh;
+      line-height: 1.6;
     }
+
+    /* Header */
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-top: 1rem;
     }
-    h1 {
-      color: #F5A623;
+    .header h1 {
       margin: 0;
-      font-size: 1.6rem;
-      letter-spacing: -0.5px;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-shadow: var(--glow);
     }
-    .card {
-      background: #111827;
-      border: 1px solid #1F2937;
+    .header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      background: transparent;
+      color: #94a3b8;
+      border: none;
       border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.1rem;
-      color: #F5F7FA;
+    .tab.active {
+      background: var(--accent);
+      color: #0f172a;
+      box-shadow: var(--glow);
+    }
+
+    /* Glass Panels */
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: none;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    .panel.active { display: block; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Form Elements */
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     select, textarea {
       width: 100%;
-      background-color: #1F2937;
-      color: #F5F7FA;
-      border: 1px solid #374151;
-      border-radius: 6px;
-      padding: 0.75rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
       font-family: inherit;
-    }
-    textarea:focus, select:focus {
-      outline: 1px solid #F5A623;
-      border-color: #F5A623;
-    }
-    button {
-      width: 100%;
-      background-color: #F5A623;
-      color: #0B1220;
-      font-weight: 700;
       font-size: 1rem;
-      padding: 0.8rem;
+      transition: border 0.3s ease;
+    }
+    textarea#codeInput { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+    textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: inset 0 0 10px rgba(56,189,248,0.2);
+    }
+
+    button.scan-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: white;
       border: none;
-      border-radius: 6px;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 800;
       cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    button:active {
-      opacity: 0.85;
-    }
-    button:disabled {
-      background-color: #4B5563;
-      cursor: not-allowed;
-    }
-    #loading {
+    button.scan-btn:active { transform: scale(0.98); }
+    button.scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Animated Loader */
+    #loader {
       display: none;
       text-align: center;
-      color: #F5A623;
-      font-weight: 600;
-      margin: 1.5rem 0;
+      padding: 3rem 0;
+    }
+    .radar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      margin: 0 auto 1rem auto;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--glow);
+    }
+    .radar::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 50%; height: 50%;
+      background: linear-gradient(45deg, transparent 50%, rgba(56,189,248,0.8) 100%);
+      transform-origin: 0 0;
+      animation: scan 1.5s linear infinite;
+    }
+    @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Threat Report (Results) */
+    #resultPanel {
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--accent);
     }
     .badge {
       display: inline-block;
-      padding: 0.25rem 0.8rem;
-      border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      margin-bottom: 0.75rem;
-      color: #0B1220;
-    }
-    .badge-Low { background-color: #10B981; }
-    .badge-Medium { background-color: #F59E0B; }
-    .badge-High { background-color: #EF4444; }
-    .screenshot-box {
-      margin-top: 1rem;
-    }
-    .screenshot-box img {
-      width: 100%;
+      padding: 0.4rem 1rem;
       border-radius: 6px;
-      border: 1px solid #374151;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      color: #fff;
     }
-    .tags {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin: 0.5rem 0;
+    .badge-Low { background: var(--safe); box-shadow: 0 0 15px var(--safe); }
+    .badge-Medium { background: var(--warning); box-shadow: 0 0 15px var(--warning); }
+    .badge-High { background: var(--danger); box-shadow: 0 0 15px var(--danger); }
+
+    .report-section { margin-bottom: 1.5rem; }
+    .report-section h3 {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
     }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
     .tag {
-      background: #374151;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 0.2rem 0.6rem;
       border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .screenshot {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 0.5rem;
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>🛡️ Sentinel AI</h1>
+    <h1>SENTINEL</h1>
+    <p>AI Threat Intelligence</p>
   </div>
 
-  <div class="card">
-    <h2>1. Scan Suspicious Message / URL</h2>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('messageTab', this)">Phishing & URLs</button>
+    <button class="tab" onclick="switchTab('codeTab', this)">Source Code</button>
+  </div>
+
+  <!-- MSG / URL SCANNER -->
+  <div id="messageTab" class="panel active">
+    <label>Communication Channel</label>
     <select id="channel">
-      <option value="sms">SMS</option>
-      <option value="whatsapp">WhatsApp</option>
+      <option value="sms">SMS / iMessage</option>
+      <option value="whatsapp">WhatsApp / Telegram</option>
       <option value="email">Email</option>
-      <option value="other">Other / Social</option>
+      <option value="social">Social Media</option>
     </select>
-    <textarea id="msgInput" rows="3" placeholder="Paste phishing text, link, or UPI id..."></textarea>
-    <button id="btnMsg" onclick="triggerScan('message')">Scan Message</button>
+    
+    <label>Payload (Text, URL, or UPI)</label>
+    <textarea id="msgInput" rows="4" placeholder="Paste the suspicious link or message here..."></textarea>
+    
+    <button class="scan-btn" onclick="triggerScan('message')">Initiate Scan</button>
   </div>
 
-  <div class="card">
-    <h2>2. Scan Code / Script</h2>
-    <textarea id="codeInput" rows="3" placeholder="Paste script or backend code..."></textarea>
-    <button id="btnCode" onclick="triggerScan('code')">Scan Code</button>
+  <!-- CODE SCANNER -->
+  <div id="codeTab" class="panel">
+    <label>Source Code Snippet</label>
+    <textarea id="codeInput" rows="6" placeholder="Paste backend script, JS, or config file..."></textarea>
+    
+    <button class="scan-btn" onclick="triggerScan('code')">Analyze Logic</button>
   </div>
 
-  <div id="loading">⚡ Running sandbox & AI analysis...</div>
-  <div id="resultCard" class="card" style="display: none;"></div>
+  <!-- SCANNING ANIMATION -->
+  <div id="loader">
+    <div class="radar"></div>
+    <p style="color: var(--accent); font-weight: 600; letter-spacing: 1px;">ISOLATING SANDBOX & ANALYZING...</p>
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div id="resultPanel" class="panel"></div>
 
   <script>
-    // Register PWA Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/static/sw.js')
-          .catch((err) => console.log('SW registration skipped:', err));
-      });
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      element.classList.add('active');
+      document.getElementById('resultPanel').style.display = 'none';
     }
 
     async function triggerScan(type) {
-      const btn = type === 'message' ? document.getElementById('btnMsg') : document.getElementById('btnCode');
-      const loader = document.getElementById('loading');
-      const resultCard = document.getElementById('resultCard');
-
-      btn.disabled = true;
+      const loader = document.getElementById('loader');
+      const resultPanel = document.getElementById('resultPanel');
+      const inputs = document.querySelectorAll('button, textarea, select');
+      
+      inputs.forEach(i => i.disabled = true);
+      resultPanel.style.display = 'none';
       loader.style.display = 'block';
-      resultCard.style.display = 'none';
 
       const endpoint = type === 'message' ? '/scan/message' : '/scan/code';
       const payload = type === 'message'
@@ -171,7 +291,6 @@
         : { code: document.getElementById('codeInput').value };
 
       try {
-        // Step 1: Scan / Sandbox
         const scanRes = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -179,7 +298,6 @@
         });
         const evidence = await scanRes.json();
 
-        // Step 2: LLM Risk Analysis
         const aiRes = await fetch('/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -187,41 +305,46 @@
         });
         const analysis = await aiRes.json();
 
-        // Step 3: Render Results
-        const riskClass = 'badge-' + (analysis.risk_level || 'High');
-        let html = `<div class="badge ${riskClass}">${analysis.risk_level || 'Alert'} Risk</div>`;
+        const risk = analysis.risk_level || 'High';
+        let html = `<div class="badge badge-${risk}">${risk} RISK DETECTED</div>`;
 
-        // Render detected flags if any
-        if (evidence.flags && evidence.flags.length > 0) {
-          html += `<div class="tags">` + evidence.flags.map(f => `<span class="tag">${f}</span>`).join('') + `</div>`;
-        }
-        if (evidence.findings && evidence.findings.length > 0) {
-          html += `<div class="tags">` + evidence.findings.map(f => `<span class="tag">${f}</span>`).join('') + `</div>`;
-        }
-
-        html += `<p><strong>Analysis:</strong><br>${analysis.explanation}</p>`;
-        html += `<p><strong>Recommended Action:</strong><br>${analysis.fix}</p>`;
-
-        // Display sandbox screenshot if available
-        if (type === 'message' && evidence.url_analysis && evidence.url_analysis.length > 0) {
-          const urlInfo = evidence.url_analysis[0];
-          if (urlInfo.screenshot_base64) {
-            html += `<div class="screenshot-box">
-              <strong>Sandboxed Live Preview:</strong>
-              <img src="data:image/png;base64,${urlInfo.screenshot_base64}" alt="Sandbox capture" />
-            </div>`;
-          } else if (urlInfo.error) {
-            html += `<p style="color:#EF4444; font-size:0.85rem;">Sandbox Notice: ${urlInfo.error}</p>`;
-          }
+        // Render extracted flags/findings as hacker-style tags
+        const allFlags = [...(evidence.flags || []), ...(evidence.findings || [])];
+        if (allFlags.length > 0) {
+          html += `<div class="report-section">
+            <h3>Heuristics Triggered</h3>
+            <div class="tags">${allFlags.map(f => `<span class="tag">${f}</span>`).join('')}</div>
+          </div>`;
         }
 
-        resultCard.innerHTML = html;
-        resultCard.style.display = 'block';
+        html += `<div class="report-section">
+          <h3>AI Analysis</h3>
+          <p>${analysis.explanation}</p>
+        </div>`;
+
+        html += `<div class="report-section">
+          <h3>Remediation Action</h3>
+          <p style="color: var(--accent); font-weight:600;">${analysis.fix}</p>
+        </div>`;
+
+        if (type === 'message' && evidence.url_analysis && evidence.url_analysis[0]?.screenshot_base64) {
+          html += `<div class="report-section">
+            <h3>Sandboxed Preview</h3>
+            <img class="screenshot" src="data:image/png;base64,${evidence.url_analysis[0].screenshot_base64}" />
+          </div>`;
+        }
+
+        resultPanel.innerHTML = html;
+        resultPanel.style.display = 'block';
+        
+        // Scroll to results smoothly
+        resultPanel.scrollIntoView({ behavior: 'smooth' });
+
       } catch (err) {
-        resultCard.innerHTML = `<p style="color:#EF4444;">Error connecting to scanner: ${err.message}</p>`;
-        resultCard.style.display = 'block';
+        resultPanel.innerHTML = `<p style="color: var(--danger);"><strong>System Error:</strong> ${err.message}</p>`;
+        resultPanel.style.display = 'block';
       } finally {
-        btn.disabled = false;
+        inputs.forEach(i => i.disabled = false);
         loader.style.display = 'none';
       }
     }
